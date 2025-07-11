@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>골프 스윙 분석기 🏌️‍♂️</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <i class="fas fa-golf-ball"></i>
+                <h1>골프 스윙 분석기</h1>
+            </div>
+            <div class="header-right">
+                <span class="status-badge">베타 버전</span>
+            </div>
+        </header>
+
+        <main class="main-content upload-section">
+            <h2>동영상을 업로드하여 스윙을 분석하세요!</h2>
+            <p>정면 또는 측면에서 촬영된 동영상이 분석에 효과적입니다.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <form id="upload-form" action="{{ url_for('upload_and_analyze') }}" method="post" enctype="multipart/form-data">
+                <label for="video-upload-input" class="upload-area">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p>여기에 동영상 파일을 드래그하거나 클릭하여 업로드</p>
+                    <input type="file" id="video-upload-input" name="video" accept="video/mp4,video/mov,video/avi" style="display: none;">
+                </label>
+                <div id="file-name-display" class="file-name-display">선택된 파일 없음</div>
+                <button type="submit" class="analyze-button" id="analyze-button">
+                    <i class="fas fa-chart-line"></i> 스윙 분석 시작
+                </button>
+            </form>
+        </main>
+
+        <footer class="footer">
+            <div class="copyright">
+                © 2024 잼나 골프 스윙 분석. All rights reserved.
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        document.getElementById('video-upload-input').addEventListener('change', function() {
+            const fileNameDisplay = document.getElementById('file-name-display');
+            if (this.files.length > 0) {
+                fileNameDisplay.textContent = `선택된 파일: ${this.files[0].name}`;
+                fileNameDisplay.style.color = '#3498db';
+            } else {
+                fileNameDisplay.textContent = '선택된 파일 없음';
+                fileNameDisplay.style.color = '#888';
+            }
+        });
+    </script>
+</body>
+</html>

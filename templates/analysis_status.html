@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>골프 스윙 분석 진행 상황 🏌️‍♂️</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <i class="fas fa-chart-line"></i>
+                <h1>분석 진행 상황</h1>
+            </div>
+            <div class="header-right">
+                <span class="status-badge" id="status-badge">분석 중...</span>
+            </div>
+        </header>
+
+        <main class="main-content status-section">
+            <h2><i class="fas fa-cogs"></i> 골프 스윙 분석 중</h2>
+            
+            <!-- 실시간 진행률 표시 -->
+            <div class="progress-container">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="progress-text">0%</div>
+            </div>
+
+            <!-- 분석 단계별 상태 -->
+            <div class="analysis-steps">
+                <div class="step" id="step-1">
+                    <i class="fas fa-video"></i>
+                    <span>동영상 로딩</span>
+                </div>
+                <div class="step" id="step-2">
+                    <i class="fas fa-user"></i>
+                    <span>포즈 감지</span>
+                </div>
+                <div class="step" id="step-3">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>스윙 분석</span>
+                </div>
+                <div class="step" id="step-4">
+                    <i class="fas fa-clipboard-check"></i>
+                    <span>결과 생성</span>
+                </div>
+            </div>
+
+            <!-- 실시간 분석 정보 -->
+            <div class="analysis-info" id="analysis-info">
+                <h3><i class="fas fa-info-circle"></i> 분석 정보</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">스윙 단계:</span>
+                        <span class="value" id="swing-phase">감지 중...</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">왼팔 각도:</span>
+                        <span class="value" id="left-arm-angle">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">어깨 회전:</span>
+                        <span class="value" id="shoulder-rotation">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">엉덩이 회전:</span>
+                        <span class="value" id="hip-rotation">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 실시간 피드백 -->
+            <div class="realtime-feedback" id="realtime-feedback">
+                <h3><i class="fas fa-comments"></i> 실시간 피드백</h3>
+                <div class="feedback-list" id="feedback-list">
+                    <div class="feedback-item">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>분석 중...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 결과 영역 -->
+            <div id="result-area" style="display: none;">
+                <h3><i class="fas fa-check-circle"></i> 분석 완료!</h3>
+                <p>골프 스윙 분석이 완료되었습니다.</p>
+                <div class="result-actions">
+                    <a href="#" id="view-result-btn" class="analyze-button">
+                        <i class="fas fa-play"></i> 결과 영상 보기
+                    </a>
+                    <a href="{{ url_for('index') }}" class="back-button">
+                        <i class="fas fa-arrow-left"></i> 새 분석 시작
+                    </a>
+                </div>
+            </div>
+
+            <!-- 오류 영역 -->
+            <div id="error-area" style="display: none;">
+                <h3><i class="fas fa-exclamation-triangle"></i> 분석 오류</h3>
+                <p id="error-message">분석 중 오류가 발생했습니다.</p>
+                <a href="{{ url_for('index') }}" class="back-button">
+                    <i class="fas fa-arrow-left"></i> 다시 시도
+                </a>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="copyright">
+                © 2024 잼나 골프 스윙 분석. All rights reserved.
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const sessionId = '{{ session_id }}';
+        let progress = 0;
+        let currentStep = 0;
+        let analysisData = {};
+
+        // 진행률 애니메이션
+        function updateProgress(targetProgress) {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            const interval = setInterval(() => {
+                if (progress >= targetProgress) {
+                    clearInterval(interval);
+                    return;
+                }
+                progress += 1;
+                progressBar.style.width = progress + '%';
+                progressText.textContent = progress + '%';
+            }, 50);
+        }
+
+        // 단계별 상태 업데이트
+        function updateStep(stepNumber) {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                if (index < stepNumber) {
+                    step.classList.add('completed');
+                    step.classList.remove('active');
+                } else if (index === stepNumber) {
+                    step.classList.add('active');
+                    step.classList.remove('completed');
+                } else {
+                    step.classList.remove('active', 'completed');
+                }
+            });
+        }
+
+        // 실시간 분석 정보 업데이트
+        function updateAnalysisInfo(data) {
+            if (data.swing_phase) {
+                document.getElementById('swing-phase').textContent = data.swing_phase;
+            }
+            if (data.left_arm_angle) {
+                document.getElementById('left-arm-angle').textContent = data.left_arm_angle.toFixed(1) + '°';
+            }
+            if (data.shoulder_rotation) {
+                document.getElementById('shoulder-rotation').textContent = data.shoulder_rotation.toFixed(3);
+            }
+            if (data.hip_rotation) {
+                document.getElementById('hip-rotation').textContent = data.hip_rotation.toFixed(3);
+            }
+        }
+
+        // 실시간 피드백 업데이트
+        function updateFeedback(feedbacks) {
+            const feedbackList = document.getElementById('feedback-list');
+            feedbackList.innerHTML = '';
+            
+            feedbacks.forEach(feedback => {
+                const feedbackItem = document.createElement('div');
+                feedbackItem.className = 'feedback-item';
+                feedbackItem.innerHTML = `
+                    <i class="fas fa-lightbulb"></i>
+                    <span>${feedback}</span>
+                `;
+                feedbackList.appendChild(feedbackItem);
+            });
+        }
+
+        // 상태 폴링
+        function pollStatus() {
+            fetch(`/get_analysis_status/${sessionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Status update:', data);
+                    
+                    if (data.status === 'processing') {
+                        // 진행 중인 경우
+                        updateProgress(75);
+                        updateStep(2);
+                        
+                        // 실시간 데이터가 있으면 업데이트
+                        if (data.analysis_data) {
+                            updateAnalysisInfo(data.analysis_data);
+                        }
+                        if (data.feedback) {
+                            updateFeedback(data.feedback);
+                        }
+                        
+                        // 2초 후 다시 폴링
+                        setTimeout(pollStatus, 2000);
+                    } else if (data.status === 'completed') {
+                        // 완료된 경우
+                        updateProgress(100);
+                        updateStep(3);
+                        
+                        document.getElementById('status-badge').textContent = '완료';
+                        document.getElementById('status-badge').style.backgroundColor = 'rgba(40, 167, 69, 0.8)';
+                        
+                        // 결과 영역 표시
+                        document.getElementById('result-area').style.display = 'block';
+                        document.getElementById('realtime-feedback').style.display = 'none';
+                        
+                        if (data.result_filename) {
+                            document.getElementById('view-result-btn').href = `/result/${data.result_filename}`;
+                        }
+                        
+                    } else if (data.status === 'failed') {
+                        // 실패한 경우
+                        updateStep(0);
+                        document.getElementById('status-badge').textContent = '실패';
+                        document.getElementById('status-badge').style.backgroundColor = 'rgba(220, 53, 69, 0.8)';
+                        
+                        document.getElementById('error-area').style.display = 'block';
+                        document.getElementById('realtime-feedback').style.display = 'none';
+                        
+                        if (data.message) {
+                            document.getElementById('error-message').textContent = data.message;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Status polling error:', error);
+                    setTimeout(pollStatus, 5000);
+                });
+        }
+
+        // 페이지 로드 시 시작
+        document.addEventListener('DOMContentLoaded', function() {
+            updateProgress(25);
+            updateStep(1);
+            pollStatus();
+        });
+    </script>
+</body>
+</html>

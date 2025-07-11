@@ -1,0 +1,5 @@
+<p>filename: {{ filename }}</p>
+<source src="{{ url_for('serve_result_video', filename=filename) }}" type="video/mp4">
+
+
+

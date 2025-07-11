@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>골프 스윙 분석 결과 🏌️‍♂️</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <i class="fas fa-chart-line"></i>
+                <h1>분석 결과</h1>
+            </div>
+            <div class="header-right">
+                <span class="status-badge" style="background-color: rgba(40, 167, 69, 0.8);">완료</span>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <h2><i class="fas fa-trophy"></i> 골프 스윙 분석 완료!</h2>
+            
+            <!-- 분석된 동영상 -->
+            <div class="video-section">
+                <h3><i class="fas fa-play-circle"></i> 분석된 스윙 영상</h3>
+                <video controls style="width: 100%; max-width: 600px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <source src="/results/{{ filename }}" type="video/mp4">
+                    동영상을 지원하지 않는 브라우저입니다.
+                </video>
+            </div>
+
+            <!-- 분석 요약 -->
+            {% if analysis_data %}
+            <div class="analysis-summary">
+                <h3><i class="fas fa-chart-bar"></i> 분석 요약</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-label">스윙 단계</span>
+                            <span class="summary-value">{{ analysis_data.swing_phase or '완료' }}</span>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-icon">
+                            <i class="fas fa-angle-left"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-label">왼팔 각도</span>
+                            <span class="summary-value">{{ "%.1f"|format(analysis_data.left_arm_angle or 0) }}°</span>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-icon">
+                            <i class="fas fa-rotate"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-label">어깨 회전</span>
+                            <span class="summary-value">{{ "%.3f"|format(analysis_data.shoulder_rotation or 0) }}</span>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-icon">
+                            <i class="fas fa-arrows-rotate"></i>
+                        </div>
+                        <div class="summary-content">
+                            <span class="summary-label">엉덩이 회전</span>
+                            <span class="summary-value">{{ "%.3f"|format(analysis_data.hip_rotation or 0) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 피드백 및 해결책 -->
+            {% if feedbacks and solutions %}
+            <div class="feedback-section">
+                <h3><i class="fas fa-lightbulb"></i> 분석 피드백 및 개선 방안</h3>
+                <div class="feedback-list">
+                    {% for fb, sol in zip(feedbacks, solutions) %}
+                    <div class="feedback-item">
+                        <div class="feedback-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="feedback-content">
+                            <div class="feedback-text">{{ fb }}</div>
+                            <div class="solution-text">{{ sol }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- 액션 버튼 -->
+            <div class="action-buttons">
+                <a href="{{ url_for('index') }}" class="analyze-button">
+                    <i class="fas fa-redo"></i> 새 분석 시작
+                </a>
+                <a href="/results/{{ filename }}" download class="back-button">
+                    <i class="fas fa-download"></i> 결과 영상 다운로드
+                </a>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="copyright">
+                © 2024 잼나 골프 스윙 분석. All rights reserved.
+            </div>
+        </footer>
+    </div>
+
+    <style>
+        .video-section {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .video-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .analysis-summary {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .analysis-summary h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .summary-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #6a5acd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .summary-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .summary-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .feedback-section {
+            width: 100%;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .feedback-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feedback-list {
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .feedback-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .feedback-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .feedback-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #ffc107;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .feedback-content {
+            flex: 1;
+        }
+
+        .feedback-text {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .solution-text {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</body>
+</html> 
