@@ -1,6 +1,22 @@
-mediapipe
-opencv-python
-numpy
-python-dotenv # for reading .env file
-flask
-pillow
+# MediaPipe - 골프 스윙 분석을 위한 포즈 추적
+# Windows에서 설치 문제가 있을 경우 아래 명령어로 설치:
+# pip install mediapipe==0.10.8
+mediapipe==0.10.8
+
+# OpenCV - 컴퓨터 비전 라이브러리
+opencv-python==4.8.1.78
+
+# NumPy - 수치 계산 라이브러리
+numpy==1.24.3
+
+# Flask - 웹 프레임워크
+flask==2.3.3
+
+# Pillow - 이미지 처리 라이브러리
+pillow==10.0.1
+
+# python-dotenv - 환경 변수 관리
+python-dotenv==1.0.0
+
+# 추가 의존성 (선택사항)
+# streamlit==1.28.1  # Streamlit 버전 사용 시
