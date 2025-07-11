@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # OpenCV 버전 (권장 - MediaPipe 설치 문제 없음)
+  golf-analyzer-simple:
+    build:
+      context: .
+      dockerfile: Dockerfile.simple
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+    environment:
+      - FLASK_ENV=production
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    container_name: golf-analyzer-simple
+
+  # MediaPipe 버전 (고급 분석)
+  golf-analyzer-advanced:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./results:/app/results
+    environment:
+      - FLASK_ENV=production
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    container_name: golf-analyzer-advanced
+
+  # Nginx 리버스 프록시 (선택사항)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - golf-analyzer-simple
+    restart: unless-stopped
+    container_name: golf-analyzer-nginx 

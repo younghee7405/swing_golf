@@ -1,0 +1,20 @@
+# 골프 스윙 분석기 (OpenCV 버전) - MediaPipe 없이 작동
+# 설치 명령어: pip install -r requirements_simple.txt
+
+# OpenCV - 컴퓨터 비전 라이브러리 (사람 감지 및 동영상 처리)
+opencv-python==4.8.1.78
+
+# NumPy - 수치 계산 라이브러리
+numpy==1.24.3
+
+# Flask - 웹 프레임워크
+flask==2.3.3
+
+# Pillow - 이미지 처리 라이브러리 (한글 폰트 지원)
+pillow==10.0.1
+
+# python-dotenv - 환경 변수 관리
+python-dotenv==1.0.0
+
+# 추가 의존성 (선택사항)
+# streamlit==1.28.1  # Streamlit 버전 사용 시 
